@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <sstream>
+#include <fstream>
 
 // some int corresponding to the amount of validArgs
 const int maxArgs = 3;
@@ -126,6 +128,28 @@ bool goodArgs(const int argc, char* argv[]) {
     return false;
   }
 
+  return true;
+}
+
+std::string readInFromFile(std::string path) {
+
+    std::stringstream ss;
+    std::string line;
+
+    std::ifstream infile(path.c_str());
+    if (!infile.is_open()) {
+      std::cout << "Error opening file" << std::endl;
+      return "";
+    }
+
+    while (std::getline(infile, line)) {
+        ss << line;
+        ss << "\n";
+    }
+
+    infile.close();
+
+    return ss.str();
 }
 
 int main(int argc, char* argv[]) {
@@ -144,6 +168,9 @@ int main(int argc, char* argv[]) {
     if(!goodArgs(argc, argv)) {
       return -1;
     }
+
+    // testing file reading. Needs to be absolute path
+    std:: cout<< readInFromFile(cipherTextLocation) << std::endl;
 
     return 0;
 }
