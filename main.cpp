@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <sstream>
 
 // some int corresponding to the amount of validArgs
 const int maxArgs = 3;
@@ -126,6 +127,56 @@ bool goodArgs(const int argc, char* argv[]) {
     return false;
   }
 
+  // all the args are good!
+  return true;
+}
+
+std::string shift_cipher_encrypt(std::string plaintext, int cshift) {
+
+  // use a stringstream
+  std::stringstream ss;
+
+  // start at position where we start the shift
+  int position = plaintext.size() - cshift;
+
+  // begin shifting
+  int counter = 0;
+  while(counter < plaintext.size()) {
+    ss << plaintext.at(position);
+
+    // pre-increment then use mod to check if we rolled over the string size
+    position = ++position % (plaintext.size());
+
+    // increment counter
+    counter++;
+  }
+
+  return ss.str();
+
+}
+
+std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
+
+  // use a stringstream
+  std::stringstream ss;
+
+  // start at position where we start the shift
+  int position = cshift;
+
+  // begin shifting
+  int counter = 0;
+  while(counter < ciphertext.size()) {
+    ss << ciphertext.at(position);
+
+    // pre-increment then use mod to check if we rolled over the string size
+    position = ++position % (ciphertext.size());
+
+    // increment counter
+    counter++;
+  }
+
+  return ss.str();
+
 }
 
 int main(int argc, char* argv[]) {
@@ -143,6 +194,17 @@ int main(int argc, char* argv[]) {
 
     if(!goodArgs(argc, argv)) {
       return -1;
+    }
+
+    // shift cipher encrypt
+    if(shift) {
+      // test encrypting
+      std::cout << shift_cipher_encrypt("teststring", 3) << std::endl;
+
+      // test decrypting
+      std::cout << shift_cipher_decrypt("ingteststr", 3) << std::endl;
+
+      return 0;
     }
 
     return 0;
