@@ -204,7 +204,6 @@ int main(int argc, char* argv[]) {
       // test decrypting
       std::cout << shift_cipher_decrypt("ingteststr", 3) << std::endl;
 
-      return 0;
     }
 
     return 0;
