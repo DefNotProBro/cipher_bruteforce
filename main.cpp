@@ -7,7 +7,7 @@
 #include <cstring>
 
 // some int corresponding to the amount of validArgs
-const int maxArgs = 3;
+const int maxArgs = 4;
 
 // different algorithms to make
 bool shift = false;
@@ -18,6 +18,7 @@ bool vige = false;
 bool rail = false;
 bool rowtr = false;
 bool shotgun = false;
+bool encrypt = true; // acts as a toggle between encrypt and decrypt. default: true
 
 // Locations of input files
 std::string cipherTextLocation;
@@ -37,6 +38,12 @@ shotgun -x
 
 -c <ciphertextlocation>
 -p <plaintextcipherlocation>
+
+?? Either pick encrypt or decrypt ??
+
+-e encrypt flag  <---- defaults to encrypt if no arguments are inputted
+-d decrypt flag
+
 */
 
 // configures the program to check and make sure that our arguments are good
@@ -45,6 +52,8 @@ bool goodArgs(const int argc, char* argv[]) {
   // counters to make sure we do not go over 1 algoArg
 
   int algoArgs = 0;
+  int encryptArgs = 0;
+
   // check against different args and
   for(int i = 1; i < argc; i++) {
 
@@ -114,6 +123,17 @@ bool goodArgs(const int argc, char* argv[]) {
         }
       }
 
+      // set encrypt to true
+      if(strcmp(argv[i], "-e") == 0) {
+        encryptArgs++;
+      }
+
+      // set decrypt to true
+      if(strcmp(argv[i], "-d") == 0) {
+        encrypt = false; // this is a toggle
+        encryptArgs++;
+      }
+
   }
 
   if(algoArgs > 1) {
@@ -126,6 +146,18 @@ bool goodArgs(const int argc, char* argv[]) {
     return false;
   }
 
+  if(encryptArgs == 0) {
+    std::cout << "Missing args for encrypting/decrypting" << std::endl;
+    return false;
+  }
+
+  if(encryptArgs > 1) {
+    std::cout << "You must either encrypt or decrypt" << std::endl;
+    return false;
+  }
+
+  return true;
+
 }
 
 int main(int argc, char* argv[]) {
@@ -137,12 +169,20 @@ int main(int argc, char* argv[]) {
     }
 
     if(argc-1 > maxArgs) {
-      std::cout << "To many arguments" << std::endl;
+      std::cout << "Too many arguments" << std::endl;
       return -1;
     }
 
     if(!goodArgs(argc, argv)) {
       return -1;
+    }
+
+    // now that we cleared our argument checking
+
+    if(encrypt) {
+      std::cout << "Do encrypting" << std::endl;
+    } else {
+      std::cout << "Do decrypting" << std::endl;
     }
 
     return 0;
