@@ -9,7 +9,7 @@
 #include <fstream>
 
 // some int corresponding to the amount of validArgs
-const int maxArgs = 3;
+const int maxArgs = 4;
 
 // different algorithms to make
 bool shift = false;
@@ -20,6 +20,7 @@ bool vige = false;
 bool rail = false;
 bool rowtr = false;
 bool shotgun = false;
+bool encrypt = true; // acts as a toggle between encrypt and decrypt. default: true
 
 // Locations of input files
 std::string cipherTextLocation;
@@ -38,7 +39,13 @@ shotgun -x
 ?? pick one from above ?? pick one or both from below ??
 
 -c <ciphertextlocation>
--p <plaintextcipherlocation>
+-pl <plaintextcipherlocation>
+
+?? Either pick encrypt or decrypt ??
+
+-e encrypt flag  <---- defaults to encrypt if no arguments are inputted
+-d decrypt flag
+
 */
 
 // configures the program to check and make sure that our arguments are good
@@ -47,6 +54,8 @@ bool goodArgs(const int argc, char* argv[]) {
   // counters to make sure we do not go over 1 algoArg
 
   int algoArgs = 0;
+  int encryptArgs = 0;
+
   // check against different args and
   for(int i = 1; i < argc; i++) {
 
@@ -105,7 +114,7 @@ bool goodArgs(const int argc, char* argv[]) {
       }
 
       // if we have a ciphertext path
-      if(strcmp(argv[i], "-p") == 0) {
+      if(strcmp(argv[i], "-pl") == 0) {
 
         // check to see we dont go over the boundry
         if(i+1 < argc) {
@@ -114,6 +123,17 @@ bool goodArgs(const int argc, char* argv[]) {
           std::cout << "Did not provide a plaintext argument" << std::endl;
           return false;
         }
+      }
+
+      // set encrypt to true
+      if(strcmp(argv[i], "-e") == 0) {
+        encryptArgs++;
+      }
+
+      // set decrypt to true
+      if(strcmp(argv[i], "-d") == 0) {
+        encrypt = false; // this is a toggle
+        encryptArgs++;
       }
 
   }
@@ -128,7 +148,18 @@ bool goodArgs(const int argc, char* argv[]) {
     return false;
   }
 
+  if(encryptArgs == 0) {
+    std::cout << "Missing args for encrypting/decrypting" << std::endl;
+    return false;
+  }
+
+  if(encryptArgs > 1) {
+    std::cout << "You must either encrypt or decrypt" << std::endl;
+    return false;
+  }
+
   return true;
+
 }
 
 std::string readInFromFile(std::string path) {
@@ -161,7 +192,7 @@ int main(int argc, char* argv[]) {
     }
 
     if(argc-1 > maxArgs) {
-      std::cout << "To many arguments" << std::endl;
+      std::cout << "Too many arguments" << std::endl;
       return -1;
     }
 
@@ -169,8 +200,17 @@ int main(int argc, char* argv[]) {
       return -1;
     }
 
-    // testing file reading. Needs to be absolute path
-    std:: cout<< readInFromFile(cipherTextLocation) << std::endl;
+    // now that we cleared our argument checking
+
+    if(encrypt) {
+      std::cout << "Do encrypting" << std::endl;
+      std:: cout<< readInFromFile(plainTextLocation) << std::endl;
+
+    } else {
+      std::cout << "Do decrypting" << std::endl;
+      std:: cout<< readInFromFile(cipherTextLocation) << std::endl;
+
+    }
 
     return 0;
 }
