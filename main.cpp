@@ -6,9 +6,10 @@
 #include <string>
 #include <cstring>
 #include <sstream>
+#include <fstream>
 
 // some int corresponding to the amount of validArgs
-const int maxArgs = 3;
+const int maxArgs = 4;
 
 // different algorithms to make
 bool shift = false;
@@ -19,6 +20,7 @@ bool vige = false;
 bool rail = false;
 bool rowtr = false;
 bool shotgun = false;
+bool encrypt = true; // acts as a toggle between encrypt and decrypt. default: true
 
 // Locations of input files
 std::string cipherTextLocation;
@@ -37,7 +39,13 @@ shotgun -x
 ?? pick one from above ?? pick one or both from below ??
 
 -c <ciphertextlocation>
--p <plaintextcipherlocation>
+-pl <plaintextcipherlocation>
+
+?? Either pick encrypt or decrypt ??
+
+-e encrypt flag  <---- defaults to encrypt if no arguments are inputted
+-d decrypt flag
+
 */
 
 // configures the program to check and make sure that our arguments are good
@@ -46,6 +54,8 @@ bool goodArgs(const int argc, char* argv[]) {
   // counters to make sure we do not go over 1 algoArg
 
   int algoArgs = 0;
+  int encryptArgs = 0;
+
   // check against different args and
   for(int i = 1; i < argc; i++) {
 
@@ -104,7 +114,7 @@ bool goodArgs(const int argc, char* argv[]) {
       }
 
       // if we have a ciphertext path
-      if(strcmp(argv[i], "-p") == 0) {
+      if(strcmp(argv[i], "-pl") == 0) {
 
         // check to see we dont go over the boundry
         if(i+1 < argc) {
@@ -113,6 +123,17 @@ bool goodArgs(const int argc, char* argv[]) {
           std::cout << "Did not provide a plaintext argument" << std::endl;
           return false;
         }
+      }
+
+      // set encrypt to true
+      if(strcmp(argv[i], "-e") == 0) {
+        encryptArgs++;
+      }
+
+      // set decrypt to true
+      if(strcmp(argv[i], "-d") == 0) {
+        encrypt = false; // this is a toggle
+        encryptArgs++;
       }
 
   }
@@ -124,6 +145,16 @@ bool goodArgs(const int argc, char* argv[]) {
 
   if(algoArgs == 0) {
     std::cout << "Check your args!" << std::endl;
+    return false;
+  }
+
+  if(encryptArgs == 0) {
+    std::cout << "Missing args for encrypting/decrypting" << std::endl;
+    return false;
+  }
+
+  if(encryptArgs > 1) {
+    std::cout << "You must either encrypt or decrypt" << std::endl;
     return false;
   }
 
@@ -179,6 +210,27 @@ std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
 
 }
 
+std::string readInFromFile(std::string path) {
+
+    std::stringstream ss;
+    std::string line;
+
+    std::ifstream infile(path.c_str());
+    if (!infile.is_open()) {
+      std::cout << "Error opening file" << std::endl;
+      return "";
+    }
+
+    while (std::getline(infile, line)) {
+        ss << line;
+        ss << "\n";
+    }
+
+    infile.close();
+
+    return ss.str();
+}
+
 int main(int argc, char* argv[]) {
 
     // basic argument parsing
@@ -188,7 +240,7 @@ int main(int argc, char* argv[]) {
     }
 
     if(argc-1 > maxArgs) {
-      std::cout << "To many arguments" << std::endl;
+      std::cout << "Too many arguments" << std::endl;
       return -1;
     }
 
@@ -196,14 +248,21 @@ int main(int argc, char* argv[]) {
       return -1;
     }
 
-    // shift cipher encrypt
-    if(shift) {
-      // test encrypting
-      std::cout << shift_cipher_encrypt("teststring", 3) << std::endl;
+    // now that we cleared our argument checking
 
-      // test decrypting
-      std::cout << shift_cipher_decrypt("ingteststr", 3) << std::endl;
+    if(encrypt) {
+      std::cout << "Do encrypting" << std::endl;
 
+      if(shift) {
+        std::cout << shift_cipher_encrypt(readInFromFile(plainTextLocation), 3) << std::endl;
+      }
+
+    } else {
+      std::cout << "Do decrypting" << std::endl;
+
+      if(shift) {
+        std::cout << shift_cipher_decrypt(readInFromFile(plainTextLocation), 3) << std::endl;
+      }
     }
 
     return 0;
