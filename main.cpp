@@ -5,6 +5,8 @@
 #include <iostream>
 #include <string>
 #include <cstring>
+#include <sstream>
+#include <fstream>
 
 // some int corresponding to the amount of validArgs
 const int maxArgs = 4;
@@ -37,7 +39,7 @@ shotgun -x
 ?? pick one from above ?? pick one or both from below ??
 
 -c <ciphertextlocation>
--p <plaintextcipherlocation>
+-pl <plaintextcipherlocation>
 
 ?? Either pick encrypt or decrypt ??
 
@@ -112,7 +114,7 @@ bool goodArgs(const int argc, char* argv[]) {
       }
 
       // if we have a ciphertext path
-      if(strcmp(argv[i], "-p") == 0) {
+      if(strcmp(argv[i], "-pl") == 0) {
 
         // check to see we dont go over the boundry
         if(i+1 < argc) {
@@ -160,6 +162,27 @@ bool goodArgs(const int argc, char* argv[]) {
 
 }
 
+std::string readInFromFile(std::string path) {
+
+    std::stringstream ss;
+    std::string line;
+
+    std::ifstream infile(path.c_str());
+    if (!infile.is_open()) {
+      std::cout << "Error opening file" << std::endl;
+      return "";
+    }
+
+    while (std::getline(infile, line)) {
+        ss << line;
+        ss << "\n";
+    }
+
+    infile.close();
+
+    return ss.str();
+}
+
 int main(int argc, char* argv[]) {
 
     // basic argument parsing
@@ -181,8 +204,12 @@ int main(int argc, char* argv[]) {
 
     if(encrypt) {
       std::cout << "Do encrypting" << std::endl;
+      std:: cout<< readInFromFile(plainTextLocation) << std::endl;
+
     } else {
       std::cout << "Do decrypting" << std::endl;
+      std:: cout<< readInFromFile(cipherTextLocation) << std::endl;
+
     }
 
     return 0;
