@@ -158,7 +158,55 @@ bool goodArgs(const int argc, char* argv[]) {
     return false;
   }
 
+  // all the args are good!
   return true;
+}
+
+std::string shift_cipher_encrypt(std::string plaintext, int cshift) {
+
+  // use a stringstream
+  std::stringstream ss;
+
+  // start at position where we start the shift
+  int position = plaintext.size() - cshift;
+
+  // begin shifting
+  int counter = 0;
+  while(counter < plaintext.size()) {
+    ss << plaintext.at(position);
+
+    // pre-increment then use mod to check if we rolled over the string size
+    position = ++position % (plaintext.size());
+
+    // increment counter
+    counter++;
+  }
+
+  return ss.str();
+
+}
+
+std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
+
+  // use a stringstream
+  std::stringstream ss;
+
+  // start at position where we start the shift
+  int position = cshift;
+
+  // begin shifting
+  int counter = 0;
+  while(counter < ciphertext.size()) {
+    ss << ciphertext.at(position);
+
+    // pre-increment then use mod to check if we rolled over the string size
+    position = ++position % (ciphertext.size());
+
+    // increment counter
+    counter++;
+  }
+
+  return ss.str();
 
 }
 
@@ -204,12 +252,17 @@ int main(int argc, char* argv[]) {
 
     if(encrypt) {
       std::cout << "Do encrypting" << std::endl;
-      std:: cout<< readInFromFile(plainTextLocation) << std::endl;
+
+      if(shift) {
+        std::cout << shift_cipher_encrypt(readInFromFile(plainTextLocation), 3) << std::endl;
+      }
 
     } else {
       std::cout << "Do decrypting" << std::endl;
-      std:: cout<< readInFromFile(cipherTextLocation) << std::endl;
 
+      if(shift) {
+        std::cout << shift_cipher_decrypt(readInFromFile(plainTextLocation), 3) << std::endl;
+      }
     }
 
     return 0;
