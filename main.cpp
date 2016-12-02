@@ -20,7 +20,6 @@ bool vige = false;
 bool rail = false;
 bool rowtr = false;
 bool shotgun = false;
-bool encrypt = true; // acts as a toggle between encrypt and decrypt. default: true
 
 // Locations of input files
 std::string cipherTextLocation;
@@ -34,17 +33,12 @@ hill -h
 vige -v
 Rail -r
 RowTr -t
-shotgun -x
+shotgun/all -x
 
 ?? pick one from above ?? pick one or both from below ??
 
 -c <ciphertextlocation>
 -pl <plaintextcipherlocation>
-
-?? Either pick encrypt or decrypt ??
-
--e encrypt flag  <---- defaults to encrypt if no arguments are inputted
--d decrypt flag
 
 */
 
@@ -54,7 +48,6 @@ bool goodArgs(const int argc, char* argv[]) {
   // counters to make sure we do not go over 1 algoArg
 
   int algoArgs = 0;
-  int encryptArgs = 0;
 
   // check against different args and
   for(int i = 1; i < argc; i++) {
@@ -125,17 +118,6 @@ bool goodArgs(const int argc, char* argv[]) {
         }
       }
 
-      // set encrypt to true
-      if(strcmp(argv[i], "-e") == 0) {
-        encryptArgs++;
-      }
-
-      // set decrypt to true
-      if(strcmp(argv[i], "-d") == 0) {
-        encrypt = false; // this is a toggle
-        encryptArgs++;
-      }
-
   }
 
   if(algoArgs > 1) {
@@ -148,42 +130,8 @@ bool goodArgs(const int argc, char* argv[]) {
     return false;
   }
 
-  if(encryptArgs == 0) {
-    std::cout << "Missing args for encrypting/decrypting" << std::endl;
-    return false;
-  }
-
-  if(encryptArgs > 1) {
-    std::cout << "You must either encrypt or decrypt" << std::endl;
-    return false;
-  }
-
   // all the args are good!
   return true;
-}
-
-std::string shift_cipher_encrypt(std::string plaintext, int cshift) {
-
-  // use a stringstream
-  std::stringstream ss;
-
-  // start at position where we start the shift
-  int position = plaintext.size() - cshift;
-
-  // begin shifting
-  int counter = 0;
-  while(counter < plaintext.size()) {
-    ss << plaintext.at(position);
-
-    // pre-increment then use mod to check if we rolled over the string size
-    position = ++position % (plaintext.size());
-
-    // increment counter
-    counter++;
-  }
-
-  return ss.str();
-
 }
 
 std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
@@ -248,21 +196,8 @@ int main(int argc, char* argv[]) {
       return -1;
     }
 
-    // now that we cleared our argument checking
-
-    if(encrypt) {
-      std::cout << "Do encrypting" << std::endl;
-
-      if(shift) {
-        std::cout << shift_cipher_encrypt(readInFromFile(plainTextLocation), 3) << std::endl;
-      }
-
-    } else {
-      std::cout << "Do decrypting" << std::endl;
-
-      if(shift) {
-        std::cout << shift_cipher_decrypt(readInFromFile(plainTextLocation), 3) << std::endl;
-      }
+    if(shift) {
+      std::cout << shift_cipher_decrypt(readInFromFile(cipherTextLocation), 3) << std::endl;
     }
 
     return 0;
