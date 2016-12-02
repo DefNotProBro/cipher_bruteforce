@@ -7,6 +7,7 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
+#include <locale>
 
 // some int corresponding to the amount of validArgs
 const int maxArgs = 4;
@@ -137,30 +138,41 @@ bool goodArgs(const int argc, char* argv[]) {
 std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
 
   // use a stringstream
-  std::stringstream ss;
+  // std::stringstream ss;
 
-  // start at position where we start the shift
-  int position = cshift;
+  // // start at position where we start the shift
+  int position = 0;
 
-  // begin shifting
-  int counter = 0;
-  while(counter < ciphertext.size()) {
-    ss << ciphertext.at(position);
+  // caesar cipher s
+  while (ciphertext[position] != '\0') {
+    if (ciphertext[position] >= 'A' && ciphertext[position]<='Z') {
 
-    // pre-increment then use mod to check if we rolled over the string size
-    position = ++position % (ciphertext.size());
+        // subtract A (which is 67) to give you the ranges of 0 to 26
+        char shiftletter = ciphertext[position] - 'A';
 
-    // increment counter
-    counter++;
+        // move characters over with shift
+        shiftletter -= cshift;
+
+        // check to see if we rolled over, if so, adjust the number
+        shiftletter =  shiftletter < 0 ? (26 + shiftletter) : shiftletter % 26;
+
+        // add A (which is 67) to give you the original range
+        ciphertext[position] = shiftletter + 'A';
+    }
+
+    // move to next character
+    position++;
   }
 
-  return ss.str();
+  // return the new plaintext which is the original string
+  return ciphertext;
 
 }
 
 std::string readInFromFile(std::string path) {
 
     std::stringstream ss;
+    std::locale loc;
     std::string line;
 
     std::ifstream infile(path.c_str());
@@ -170,13 +182,22 @@ std::string readInFromFile(std::string path) {
     }
 
     while (std::getline(infile, line)) {
-        ss << line;
+
+        // to uppercase
+        for (std::string::size_type i=0; i<line.length(); ++i) {
+          ss << std::toupper(line[i],loc);
+        }
+
         ss << "\n";
     }
 
     infile.close();
 
-    return ss.str();
+    // remove last new line character
+    std::string toReturn = ss.str();
+    toReturn.erase(toReturn.length()-1);
+
+    return toReturn;
 }
 
 int main(int argc, char* argv[]) {
