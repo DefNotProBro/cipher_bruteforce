@@ -146,10 +146,10 @@ std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
 
   // caesar cipher s
   while (ciphertext[position] != '\0') {
-    if (ciphertext[position] >= 'A' && ciphertext[position]<='Z') {
+    if (ciphertext[position] >= 'a' && ciphertext[position]<='z') {
 
         // subtract A (which is 67) to give you the ranges of 0 to 26
-        char shiftletter = ciphertext[position] - 'A';
+        char shiftletter = ciphertext[position] - 'a';
 
         // move characters over with shift
         shiftletter -= cshift;
@@ -158,7 +158,7 @@ std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
         shiftletter =  shiftletter < 0 ? (26 + shiftletter) : shiftletter % 26;
 
         // add A (which is 67) to give you the original range
-        ciphertext[position] = shiftletter + 'A';
+        ciphertext[position] = shiftletter + 'a';
     }
 
     // move to next character
@@ -186,10 +186,10 @@ std::string readInFromFile(std::string path) {
 
         // to uppercase
         for (std::string::size_type i=0; i<line.length(); ++i) {
-          ss << std::toupper(line[i],loc);
+          ss << std::tolower(line[i],loc);
         }
 
-        ss << "\n";
+        ss << " ";
     }
 
     infile.close();
@@ -236,7 +236,7 @@ bool is_english(std::string str) {
     }
 
     for (std::string s : tokens) {
-        if (is_word(s)) { hits++; }
+        if (is_word(s)) { hits++;}
     }
 
     if (hits / tokens.size() >= threshhold) {
@@ -246,6 +246,18 @@ bool is_english(std::string str) {
     else {
         return false;
     }
+}
+
+bool do_shift(std::string cipherText) {
+
+  for(int i = 1; i < 26; i++) {
+    std::string shift = shift_cipher_decrypt(cipherText, i);
+    std:: cout<< shift << std::endl;
+    if(is_english(shift)) {
+      std::cout << "\nWe cracked it with Shift!:\n" << shift << std::endl;
+      return true;
+    }
+  }
 }
 
 int main(int argc, char* argv[]) {
@@ -266,7 +278,12 @@ int main(int argc, char* argv[]) {
     }
 
     if(shift) {
-      std::cout << shift_cipher_decrypt(readInFromFile(cipherTextLocation), 3) << std::endl;
+
+      if(do_shift(readInFromFile(cipherTextLocation))) {
+        return 0;
+      }
+
+      return -1;
     }
 
     return 0;
