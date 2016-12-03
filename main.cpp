@@ -7,10 +7,11 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
+#include <vector>
 
 // some int corresponding to the amount of validArgs
 const int maxArgs = 4;
-
+const std::string WORDS_PATH = "words.txt";
 // different algorithms to make
 bool shift = false;
 bool mono = false;
@@ -229,6 +230,53 @@ std::string readInFromFile(std::string path) {
     infile.close();
 
     return ss.str();
+}
+
+// Word recognition
+bool is_word(std::string candidate) {
+    std::string line;
+    std::ifstream wordlist (WORDS_PATH);
+    
+    if (!wordlist.is_open()) {
+        std::cout << "Error opening file" << std::endl;
+        return false;
+    }
+
+    while (std::getline(wordlist, line)) {
+        if (line.compare(candidate) == 0) {
+            wordlist.close();
+            return true;
+        }
+    }
+    wordlist.close();
+    return false;
+}
+
+bool is_english(std::string str) {
+    
+    float threshhold = 0.85;
+    int hits = 0;
+
+    std::string buf; // Buffer String
+    std::stringstream ss(str); // Insert the string into a stream
+    
+    std::vector<std::string> tokens; // Vector to hold our tokens
+
+    while(ss >> buf) {
+        tokens.push_back(buf);
+    }
+
+    for (std::string s : tokens) {
+        if (is_word(s)) { hits++; }
+    }
+
+    if (hits / tokens.size() >= threshhold) {
+        return true;
+    }
+
+    else {
+        return false;
+    }
 }
 
 int main(int argc, char* argv[]) {
