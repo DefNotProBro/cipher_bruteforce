@@ -69,7 +69,7 @@ bool goodArgs(const int argc, char* argv[]) {
         mono = true;
         algoArgs++;
       }
-      
+
       // set shift to true
       if(strcmp(argv[i], "-s") == 0) {
         shift = true;
@@ -306,11 +306,11 @@ std::string readInFromFile(std::string path) {
 std::string mono_sub(std::string ciphertext) {
 	std::string plaintext = "";
 	int size = ciphertext.length();
-	
+
 	// Add all of the frequencies from the English language, according to
 	// Cornel University. https://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
 	char freq[26];
-	freq[0]  = 'e'; 
+	freq[0]  = 'e';
 	freq[1]  = 't';
 	freq[2]  = 'a';
 	freq[3]  = 'o';
@@ -336,7 +336,7 @@ std::string mono_sub(std::string ciphertext) {
 	freq[23] = 'q';
 	freq[24] = 'j';
 	freq[25] = 'z';
-	
+
 	// Initialize the counter variables
 	std::unordered_map<char, int> count;
 	count['a'] = 0;
@@ -371,11 +371,11 @@ std::string mono_sub(std::string ciphertext) {
 			count[ciphertext.at(i)]++;
 		}
 	}
-	
+
 	for(int i = 0; i < 26; ++i) {
 		std::cout << freq[i] << " :: " << count[freq[i]] << std::endl;
 	}
-	
+
 	std::unordered_map<char, char> assoc;
 	int max, max_index;
 	int fr = 0;
@@ -387,25 +387,25 @@ std::string mono_sub(std::string ciphertext) {
 				max_index = j;
 			}
 		}
-		
+
 		assoc[freq[i]] = freq[max_index];
-		
+
 	count[freq[max_index]] = 0;
 	}
-	
+
 	for(int i = 0; i < 26; ++i) {
 		std::cout << freq[i] << " :: " << assoc[freq[i]] << std::endl;
 	}
-	
-//	std::replace(ciphertext.begin(), ciphertext.end(), 'k', char('e' - 32));	
+
+//	std::replace(ciphertext.begin(), ciphertext.end(), 'k', char('e' - 32));
 	for(int i = 0; i < 26; ++i) {
 		std::cout << ciphertext << std::endl << std::endl;
 		std::cout << freq[i] << "," << assoc[freq[i]] << std::endl << std::endl;
-		std::replace(ciphertext.begin(), ciphertext.end(), assoc[freq[i]], char(freq[i] - 32));	
-	} 
-	
+		std::replace(ciphertext.begin(), ciphertext.end(), assoc[freq[i]], char(freq[i] - 32));
+	}
+
 	std::cout << ciphertext;
-	
+
 	return "";
 }
 
@@ -586,14 +586,14 @@ int main(int argc, char* argv[]) {
     if(!goodArgs(argc, argv)) {
       return -1;
     }
-    
+
     if(mono) {
     	mono_sub(readInFromFile(cipherTextLocation));
      	return 0;
     }
-    
+
     if(shift) {
-    	
+
 
       if(do_shift(readInFromFile(cipherTextLocation))) {
         return 0;
@@ -649,6 +649,9 @@ int main(int argc, char* argv[]) {
       if(do_columnar(readInFromFile(cipherTextLocation))) {
         return 0;
       }
+
+      mono_sub(readInFromFile(cipherTextLocation));
+     	return 0;
     }
 
     return 0;
