@@ -260,6 +260,8 @@ bool do_shift(std::string cipherText) {
       return true;
     }
   }
+
+  return false;
 }
 
 void string_permutation(std::string& orig, std::string& perm, std::vector<std::string>& controlVector)
