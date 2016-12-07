@@ -9,6 +9,8 @@
 #include <fstream>
 #include <vector>
 #include <locale>
+#include <unordered_map>
+#include <algorithm>
 
 // some int corresponding to the amount of validArgs
 const int maxArgs = 4;
@@ -60,6 +62,12 @@ bool goodArgs(const int argc, char* argv[]) {
         algoArgs++;
       }
 
+      // set mono to true
+      if(strcmp(argv[i], "-m") == 0) {
+        mono = true;
+        algoArgs++;
+      }
+      
       // set shift to true
       if(strcmp(argv[i], "-s") == 0) {
         shift = true;
@@ -201,6 +209,113 @@ std::string readInFromFile(std::string path) {
     return toReturn;
 }
 
+// Mono alphabetic substitution
+std::string mono_sub(std::string ciphertext) {
+	std::string plaintext = "";
+	int size = ciphertext.length();
+	
+	// Add all of the frequencies from the English language, according to
+	// Cornel University. https://www.math.cornell.edu/~mec/2003-2004/cryptography/subs/frequencies.html
+	char freq[26];
+	freq[0]  = 'e'; 
+	freq[1]  = 't';
+	freq[2]  = 'a';
+	freq[3]  = 'o';
+	freq[4]  = 'i';
+	freq[5]  = 'n';
+	freq[6]  = 's';
+	freq[7]  = 'r';
+	freq[8]  = 'h';
+	freq[9]  = 'd';
+	freq[10] = 'l';
+	freq[11] = 'u';
+	freq[12] = 'c';
+	freq[13] = 'm';
+	freq[14] = 'f';
+	freq[15] = 'y';
+	freq[16] = 'w';
+	freq[17] = 'g';
+	freq[18] = 'p';
+	freq[19] = 'b';
+	freq[20] = 'v';
+	freq[21] = 'k';
+	freq[22] = 'x';
+	freq[23] = 'q';
+	freq[24] = 'j';
+	freq[25] = 'z';
+	
+	// Initialize the counter variables
+	std::unordered_map<char, int> count;
+	count['a'] = 0;
+	count['b'] = 0;
+	count['c'] = 0;
+	count['d'] = 0;
+	count['e'] = 0;
+	count['f'] = 0;
+	count['g'] = 0;
+	count['h'] = 0;
+	count['i'] = 0;
+	count['j'] = 0;
+	count['k'] = 0;
+	count['l'] = 0;
+	count['m'] = 0;
+	count['n'] = 0;
+	count['o'] = 0;
+	count['p'] = 0;
+	count['q'] = 0;
+	count['r'] = 0;
+	count['s'] = 0;
+	count['t'] = 0;
+	count['u'] = 0;
+	count['v'] = 0;
+	count['w'] = 0;
+	count['x'] = 0;
+	count['y'] = 0;
+	count['z'] = 0;
+
+	for(int i = 0; i < ciphertext.length(); ++i) {
+		if (ciphertext.at(i) != ' ') {
+			count[ciphertext.at(i)]++;
+		}
+	}
+	
+	for(int i = 0; i < 26; ++i) {
+		std::cout << freq[i] << " :: " << count[freq[i]] << std::endl;
+	}
+	
+	std::unordered_map<char, char> assoc;
+	int max, max_index;
+	int fr = 0;
+	for(int i = 0; i < 26; ++i) {
+		max = 0;
+		for(int j = 0; j < 26; ++j) {
+			if(count[freq[j]] > max) {
+				max = count[freq[j]];
+				max_index = j;
+			}
+		}
+		
+		assoc[freq[i]] = freq[max_index];
+		
+	count[freq[max_index]] = 0;
+	}
+	
+	for(int i = 0; i < 26; ++i) {
+		std::cout << freq[i] << " :: " << assoc[freq[i]] << std::endl;
+	}
+	
+//	std::replace(ciphertext.begin(), ciphertext.end(), 'k', char('e' - 32));	
+	for(int i = 0; i < 26; ++i) {
+		std::cout << ciphertext << std::endl << std::endl;
+		std::cout << freq[i] << "," << assoc[freq[i]] << std::endl << std::endl;
+		std::replace(ciphertext.begin(), ciphertext.end(), assoc[freq[i]], char(freq[i] - 32));	
+	} 
+	
+	std::cout << ciphertext;
+	
+	return "";
+}
+
 // Word recognition
 bool is_word(std::string candidate) {
     std::string line;
@@ -276,8 +391,14 @@ int main(int argc, char* argv[]) {
     if(!goodArgs(argc, argv)) {
       return -1;
     }
-
+    
+    if(mono) {
+    	mono_sub(readInFromFile(cipherTextLocation));
+     	return 0;
+    }
+    
     if(shift) {
+    	
 
       if(do_shift(readInFromFile(cipherTextLocation))) {
         return 0;
