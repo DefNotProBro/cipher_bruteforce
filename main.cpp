@@ -174,18 +174,18 @@ std::string shift_cipher_decrypt(std::string ciphertext, int cshift) {
 
 //Method decrypts a rail cipher based on a single depth
 std::string railDec(std::string cipher, int depth){
-	
+
 	int z = (2*depth)-2; int x = 0; std::string text[depth];
 	int segment = cipher.length()/z; int extra = cipher.length()%z;
 	std::string plain = "";
-	
+
 	//This for loop is used to initialize the rows, dividing the cipher text into the individual rows
 	for(int i = 0; i < depth; i++){
-		//this y variable will be used to represent the length of a given row i		
+		//this y variable will be used to represent the length of a given row i
 		int y = 0;
 		//For initializing the first and last rows of the rail cipher
 		//These two rows have only one entry per completed segment
-		//extra if statements add onto the size	
+		//extra if statements add onto the size
 		if(i == 0 || i == depth-1){
 			y = segment;
 			if(extra > 0 && i == 0){y += 1;}
@@ -196,8 +196,8 @@ std::string railDec(std::string cipher, int depth){
 		//there are also if statements for adding more onto y if needed
 		else{
 			y = 2 * segment;
-			if(extra > z-i){y += 2;} 
-			else if(extra > i){y += 1;} 
+			if(extra > z-i){y += 2;}
+			else if(extra > i){y += 1;}
 		}
 		//Finally, this sets the row value to the text array
 		//y is added to x immediately after so that the next row won't pull values that already belong to the one before it
@@ -206,47 +206,47 @@ std::string railDec(std::string cipher, int depth){
 	//This for loop then reconstructs the original message, pulling a variable from each row in the required order
 	for(int j = 0; j < cipher.length(); j++){
 		int a = j%z;
-		//this if statement handles when you're moving up the rail and reading the rows in reverse order		
+		//this if statement handles when you're moving up the rail and reading the rows in reverse order
 		if(a >= depth){a = z - a;}
-		plain += text[a].at(0); 
-		text[a] = text[a].substr(1,text[a].length()-1);		
+		plain += text[a].at(0);
+		text[a] = text[a].substr(1,text[a].length()-1);
 	}
 	//returns the plaintext
 	return plain;
 }
 
 bool do_viginere(std::string plain, std::string cipher){
-	
+
 	//Takes in both cipher and plain text and initializes a key
 	std::string key = ""; std::string plains = "";
 	//if(plain.length() != cipher.length()){return "ERROR: Mismatching string lengths!";}
 	for(int i = 0; i < plain.length(); i++){
 		if(plain.at(i) == ' '){continue;}
-		if(plain.at(i) < 97){plain.at(i) += 32;} 
+		if(plain.at(i) < 97){plain.at(i) += 32;}
 		if(cipher.at(i) < 97){cipher.at(i) += 32;}
-		int c = cipher.at(i) - plain.at(i); if(c < 0){c += 26;} c += 97;		
+		int c = cipher.at(i) - plain.at(i); if(c < 0){c += 26;} c += 97;
 		key += (char) c; plains += plain.at(i);
 	}
 
 	//Second for loop analyzes the full key to find the specific key word whether its periodic or autokeyed
 	for(int j = 1; j < key.length(); j++){
-		
-		//Handles a periodic viginere key		
+
+		//Handles a periodic viginere key
 		if(key.at(j) == key.at(0)){
 			int l = 0; bool loop = false; int k;
 			for(k = 1; k < key.length()/(j-1); k++){
 				if(key.substr(l*j,j) == key.substr(k*j,j)){loop = true; l++;}
 				else{loop = false; break;}
 			}
-			
+
 			//in event that a periodic key doesn't fully loop this ensures that it doesn't go by unnoticed
 			if(key.length()%(j-1) > 0){
-				if(key.substr(k*j, key.length()-k*j) == key.substr(0, key.length()-(k*j))){loop = true;}			
+				if(key.substr(k*j, key.length()-k*j) == key.substr(0, key.length()-(k*j))){loop = true;}
 				else{loop = false;}
 			}
 			if(loop == true){
       				std::cout << "\nWe found a periodical Viginere Key!:\n" << key.substr(0,j) << std::endl;
-      				return true;		 			
+      				return true;
 			}
 		}
 
@@ -254,9 +254,9 @@ bool do_viginere(std::string plain, std::string cipher){
 		if(key.at(j) == plain.at(0)){
 			if(key.substr(j, key.length()-j) == plains.substr(0, key.length()-j)){
 				std::cout << "\nWe found an autokeyed Viginere Key!:\n" << key.substr(0,j) << std::endl;
-      				return true;		 			
+      				return true;
 			}
-		} 
+		}
 	}
 	//this key will only be returned if it is neither periodic or auto-keyed and that the full key length is uniquely defined
 	std::cout << "\nWe found a Viginere Key!:\n" << key << std::endl;
@@ -445,7 +445,7 @@ bool do_columnar(std::string cipherText) {
 
 //This method checks all possible depths by going through a for loop for every possible depth
 bool do_rail(std::string cipher){
-	for(int i = 2; i < cipher.length(); i++){		
+	for(int i = 2; i < cipher.length(); i++){
 		std::string rail = railDec(cipher,i);
 		std:: cout<< rail << std::endl;
 		if(is_english(rail)){
@@ -480,7 +480,7 @@ int main(int argc, char* argv[]) {
 
       return -1;
     }
-	
+
     if(rail) {
 
       if(do_rail(readInFromFile(cipherTextLocation))) {
@@ -505,6 +505,29 @@ int main(int argc, char* argv[]) {
       }
 
       return -1;
+    }
+
+    if(shotgun) {
+
+      if(!plainTextLocation.empty()) {
+        if(do_viginere(readInFromFile(plainTextLocation), readInFromFile(cipherTextLocation))) {
+          return 0;
+        }
+
+        return -1;
+      }
+
+      if(do_shift(readInFromFile(cipherTextLocation))) {
+        return 0;
+      }
+
+      if(do_rail(readInFromFile(cipherTextLocation))) {
+        return 0;
+      }
+
+      if(do_columnar(readInFromFile(cipherTextLocation))) {
+        return 0;
+      }
     }
 
     return 0;
