@@ -10,6 +10,8 @@
 #include <vector>
 #include <locale>
 
+#include <algorithm>
+
 // some int corresponding to the amount of validArgs
 const int maxArgs = 4;
 const std::string WORDS_PATH = "words.txt";
@@ -260,6 +262,94 @@ bool do_shift(std::string cipherText) {
   }
 }
 
+void string_permutation(std::string& orig, std::string& perm, std::vector<std::string>& controlVector)
+{
+	if (orig.empty())
+	{
+		controlVector.push_back(perm);
+		return;
+	}
+
+	for (int i = 0; i < orig.size(); ++i)
+	{
+		std::string orig2 = orig;
+
+		orig2.erase(i, 1);
+
+		std::string perm2 = perm;
+
+		perm2 += orig.at(i);
+
+		string_permutation(orig2, perm2, controlVector);
+	}
+}
+
+bool do_columnar(std::string cipherText) {
+  //Working Variables
+	int testKeylen;
+	int columnSize;
+
+	//This variable holds the temporary String Row calculations for each testKey
+	std::vector <std::string> possibleRows;
+	std::vector <std::string> controlVector;
+
+	for (testKeylen = 2; testKeylen <= 6/*cipherText.size() / 2*/; testKeylen++) //Test keys 2 --> half the size of input
+	{
+		if (cipherText.size() % testKeylen != 0) //Only test keys which are factors of input text size. Prevents ICT
+		{
+			continue;
+		}
+		//cout << "rows: " << cipherText.size() / testKeylen << endl;
+		columnSize = cipherText.size() / testKeylen;
+		for (int i = 0; i < testKeylen; i++) //One iteration per column. Tokenize input into distinct columns
+		{
+			possibleRows.push_back(cipherText.substr((i*columnSize), columnSize));
+		}
+
+		std::string orig; //Form "ABCDE"
+		std::string perm;
+
+		//Initialize orig. Orig is the list of alphanumeric characters that will be permutated
+		for (int j = 0; j < testKeylen; j++)
+		{
+			orig.push_back(((char)(65 + j)));
+		}
+
+		//Perform permutation for testKeyLen characters, store in controlVector
+		string_permutation(orig, perm, controlVector);
+
+		std::string solnString = "";
+		int a;
+		std::string ss;
+		for (int x = 0; x < controlVector.size(); x++) //Iterate through all possible key permutations
+		{
+			solnString = "";
+			//cout << "controlV[x]: " << controlVector[x] << endl;
+			for (int z = 0; z < columnSize; z++) //Which character position are we looking at?
+			{
+				for (int y = 0; y < controlVector[x].size(); y++) //Iterate through each column. 0 --> numColumns. Aka testKeyLen
+				{
+					a = controlVector[x].at(y) - 65; //Which column are we looking at? Defined by controlVector permutation
+					ss = possibleRows[a].substr(z, 1); //Substr from the desired column, at the desired character position
+					solnString.append(ss);
+				}
+			}
+
+      // replace underscores with spaces
+      std::replace(solnString.begin(), solnString.end(), '_', ' ');
+			std::cout << solnString << std::endl;
+      if(is_english(solnString)) {
+        std::cout << "\nWe cracked it with columnar transposition!:\n" << std::endl;
+        return true;
+      }
+		}
+		controlVector.clear();
+		possibleRows.clear();
+	}
+
+  return false;
+}
+
 int main(int argc, char* argv[]) {
 
     // basic argument parsing
@@ -280,6 +370,14 @@ int main(int argc, char* argv[]) {
     if(shift) {
 
       if(do_shift(readInFromFile(cipherTextLocation))) {
+        return 0;
+      }
+
+      return -1;
+    }
+
+    if(rowtr) {
+      if(do_columnar(readInFromFile(cipherTextLocation))) {
         return 0;
       }
 
