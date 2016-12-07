@@ -254,7 +254,7 @@ bool do_shift(std::string cipherText) {
     std::string shift = shift_cipher_decrypt(cipherText, i);
     std:: cout<< shift << std::endl;
     if(is_english(shift)) {
-      std::cout << "We cracked it with Shift!:\n" << shift << std::endl;
+      std::cout << "\nWe cracked it with Shift!:\n" << shift << std::endl;
       return true;
     }
   }
